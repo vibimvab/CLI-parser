@@ -1,17 +1,10 @@
 package oop.project.cli;
 
-import oop.project.cli.InputParsing.Lexer;
-import oop.project.cli.InputParsing.Parser;
-import oop.project.cli.InputParsing.Token;
-
-import java.awt.print.Paper;
-import java.util.List;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
 public class Scenarios {
-    private static final Parser parser = new Parser();
 
     /**
      * Parses and returns the arguments of a command (one of the scenarios
@@ -21,23 +14,18 @@ public class Scenarios {
      * your needs - use whatever is convenient for your design.
      */
     public static Map<String, Object> parse(String command) {
-        List<Token> tokens = parser.lexer.lex(command);
-
-        if (tokens.isEmpty()) {
-            throw new IllegalArgumentException("No input provided.");
-        }
-
-        Token commandToken = tokens.get(0);
-        if (commandToken.getType() != Token.Type.COMMAND) {
-            throw new IllegalArgumentException("Expected a command, got " + commandToken.getValue());
-        }
-
-        return switch (commandToken.getValue()) {
-            case "add" -> add(tokens);
-            case "sub" -> sub(tokens);
-            case "sqrt" -> sqrt(tokens);
-            case "calc" -> calc(tokens);
-            case "date" -> date(tokens);
+        //This assumes commands follow a similar structure to unix commands,
+        //e.g. `command [arguments...]`. If your project uses a different
+        //structure, e.g. Lisp syntax like `(command [arguments...])`, you may
+        //need to adjust this a bit to work as expected.
+        var split = command.split(" ", 2);
+        var base = split[0];
+        return switch (base) {
+            case "add" -> add(command);
+            case "sub" -> sub(command);
+            case "sqrt" -> sqrt(command);
+            case "calc" -> calc(command);
+            case "date" -> date(command);
             default -> throw new IllegalArgumentException("Unknown command.");
         };
     }
@@ -47,16 +35,11 @@ public class Scenarios {
      *  - {@code left: <your integer type>}
      *  - {@code right: <your integer type>}
      */
-    private static Map<String, Object> add(List<Token> tokens) {
-        if (tokens.size() < 3) {
-            throw new IllegalArgumentException("add command requires two integer arguments.");
-        }
-        Token left = tokens.get(1);
-        Token right = tokens.get(2);
-        if (left.getType() != Token.Type.INTEGER || right.getType() != Token.Type.INTEGER) {
-            throw new IllegalArgumentException("add command requires two integers.");
-        }
-        return parser.parse(tokens);
+    private static Map<String, Object> add(String arguments) {
+        //TODO: Parse arguments and extract values.
+        int left = 0; //or BigInteger, etc.
+        int right = 0;
+        return Map.of("left", left, "right", right);
     }
 
     /**
@@ -66,7 +49,7 @@ public class Scenarios {
      *       this as a non-optional decimal value using a default of 0.0.
      *  - {@code right: <your decimal type>} (required)
      */
-    static Map<String, Object> sub(List<Token> tokens) {
+    static Map<String, Object> sub(String arguments) {
         //TODO: Parse arguments and extract values.
         Optional<Double> left = Optional.empty();
         double right = 0.0;
@@ -77,7 +60,7 @@ public class Scenarios {
      * Takes one positional argument:
      *  - {@code number: <your integer type>} where {@code number >= 0}
      */
-    static Map<String, Object> sqrt(List<Token> tokens) {
+    static Map<String, Object> sqrt(String arguments) {
         //TODO: Parse arguments and extract values.
         int number = 0;
         return Map.of("number", number);
@@ -89,7 +72,7 @@ public class Scenarios {
      *     - Note: Not all projects support subcommands, but if yours does you
      *       may want to take advantage of this scenario for that.
      */
-    static Map<String, Object> calc(List<Token> tokens) {
+    static Map<String, Object> calc(String arguments) {
         //TODO: Parse arguments and extract values.
         String subcommand = "";
         return Map.of("subcommand", subcommand);
@@ -102,7 +85,7 @@ public class Scenarios {
      *     - Note: Consider this a type that CANNOT be supported by your library
      *       out of the box and requires a custom type to be defined.
      */
-    static Map<String, Object> date(List<Token> tokens) {
+    static Map<String, Object> date(String arguments) {
         //TODO: Parse arguments and extract values.
         LocalDate date = LocalDate.EPOCH;
         return Map.of("date", date);
