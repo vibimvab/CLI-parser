@@ -1,4 +1,4 @@
-package oop.project.cli.InputParsing;
+package oop.project.cli;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -8,10 +8,22 @@ import oop.project.cli.InputParsing.Token;
 
 public class Parser {
     public Lexer lexer;
+    private List<Command> commands;
 
     public Parser() {
         this.lexer = new Lexer();
+        commands = new ArrayList<>();
     }
+
+    public void addCommand(String name, List<Argument> positionalArguments, List<Argument> namedArguments) {
+        commands.add(new Command(name, positionalArguments, namedArguments));
+    }
+
+    public void addCommand(String name, List<Argument> positionalArguments, List<Argument> namedArguments,
+                           boolean requireConfirmation, String confirmationMessage) {
+        commands.add(new Command(name, positionalArguments, namedArguments, requireConfirmation, confirmationMessage));
+    }
+
     public Map<String, Object> parse(List<Token> tokens) {
         if (tokens.isEmpty()) {
             System.out.println("No input provided.");
@@ -21,20 +33,39 @@ public class Parser {
         if (commandToken.getType() != Token.Type.COMMAND) {
             throw new IllegalArgumentException("Expected a command, got " + commandToken.getValue());
         }
-        switch (commandToken.getValue()) {
-            case "add":
-                return handleAdd(tokens);
-            case "sub":
-                return handleSubtract(tokens);
-            case "calc":
-                return handleCalc(tokens);
-            case "date":
-                return handleDate(tokens);
-            default:
-                System.out.println("Invalid command: " + commandToken.getValue());
-                throw new IllegalArgumentException("Invalid Command");
+//        switch (commandToken.getValue()) {
+//            case "add":
+//                return handleAdd(tokens);
+//            case "sub":
+//                return handleSubtract(tokens);
+//            case "calc":
+//                return handleCalc(tokens);
+//            case "date":
+//                return handleDate(tokens);
+//            default:
+//                System.out.println("Invalid command: " + commandToken.getValue());
+//                throw new IllegalArgumentException("Invalid Command");
+//        }
+
+        for (Command command: commands) {
+            if (command.name.equals(commandToken.getValue())) {
+                return handleCommand(tokens);
+            }
         }
+
+        // command not found in command list
+        System.out.println("Invalid command: " + commandToken.getValue());
+        throw new IllegalArgumentException("Invalid Command");
     }
+
+    /**
+    * General use function that parses arguments according to
+    * */
+    private Map<String, Object> handleCommand(List<Token> tokens) {
+        // Todo
+        throw new UnsupportedOperationException();
+    }
+
     private Map<String, Object> handleAdd(List<Token> tokens) {
         List<Integer> returnValue = new ArrayList<>();
         if (tokens.size() != 3) {
@@ -77,6 +108,7 @@ public class Parser {
         System.out.println("Result of sub: " + (left - right));
         throw new IllegalArgumentException("No input provided.");
     }
+
     private Map<String, Object> handleCalc(List<Token> tokens) {
         if (tokens.size() < 2) {
             System.out.println("Error: 'calc' command requires a subcommand.");
