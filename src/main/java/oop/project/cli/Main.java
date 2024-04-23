@@ -1,26 +1,25 @@
 package oop.project.cli;
 
 import java.util.Scanner;
+import java.util.Map;
 
 public class Main {
-
-    /**
-     * A default implementation of main that can be used to run scenarios.
-     */
     public static void main(String[] args) {
-        var scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your command:");
         while (true) {
-            var input = scanner.nextLine();
+            String input = scanner.nextLine();
             if (input.equals("exit")) {
                 break;
             }
             try {
-                var result = Scenarios.parse(input);
-                System.out.println(result);
+                Map<String, Object> result = Scenarios.parse(input);
+                System.out.println("Result: " + result);
             } catch (Exception e) {
-                System.out.println("Unexpected exception: " + e.getClass().getName() + ", " + e.getMessage());
+                System.out.println("Error processing command: " + e.getMessage());
             }
         }
+        scanner.close();
+        System.out.println("Program exited.");
     }
-
 }
