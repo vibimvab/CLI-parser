@@ -20,13 +20,12 @@ public class Scenarios {
         //need to adjust this a bit to work as expected.
         var split = command.split(" ", 2);
         var base = split[0];
-        var arguments = split.length == 2 ? split[1] : "";
         return switch (base) {
-            case "add" -> add(arguments);
-            case "sub" -> sub(arguments);
-            case "sqrt" -> sqrt(arguments);
-            case "calc" -> calc(arguments);
-            case "date" -> date(arguments);
+            case "add" -> add(command);
+            case "sub" -> sub(command);
+            case "sqrt" -> sqrt(command);
+            case "calc" -> calc(command);
+            case "date" -> date(command);
             default -> throw new IllegalArgumentException("Unknown command.");
         };
     }
