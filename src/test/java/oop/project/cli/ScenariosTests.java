@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ScenariosTests {
 
     @Nested
@@ -19,16 +21,26 @@ public class ScenariosTests {
         @ParameterizedTest
         @MethodSource
         public void testAdd(String name, String command, Object expected) {
-            test(command, expected);
+            try {
+                Map<String, Object> result = Scenarios.parse(command);
+                assertEquals(expected, result);
+            } catch (Exception e) {
+                if (expected instanceof Class<?>) {
+                    assertTrue(((Class<?>) expected).isInstance(e));
+                } else {
+                    throw e;
+                }
+            }
         }
+
 
         public static Stream<Arguments> testAdd() {
             return Stream.of(
                 Arguments.of("Add", "add 1 2", Map.of("left", 1, "right", 2)),
-                Arguments.of("Missing Argument", "add 1", null),
-                Arguments.of("Extraneous Argument", "add 1 2 3", null),
-                Arguments.of("Not A Number", "add one two", null),
-                Arguments.of("Not An Integer", "add 1.0 2.0", null)
+                Arguments.of("Missing Argument", "add 1", IllegalArgumentException.class),
+                Arguments.of("Extraneous Argument", "add 1 2 3", IllegalArgumentException.class),
+                Arguments.of("Not A Number", "add one two", IllegalArgumentException.class),
+                Arguments.of("Not An Integer", "add 1.0 2.0", IllegalArgumentException.class)
             );
         }
 
@@ -39,19 +51,28 @@ public class ScenariosTests {
 
         @ParameterizedTest
         @MethodSource
-        public void testSub(String name, String command, Object expected) {
-            test(command, expected);
+        public void testSub(String name, String command, Object expected){
+            try {
+                Map<String, Object> result = Scenarios.parse(command);
+                assertEquals(expected, result);
+            } catch (Exception e) {
+                if (expected instanceof Class<?>) {
+                    assertTrue(((Class<?>) expected).isInstance(e));
+                } else {
+                    throw e;
+                }
+            }
         }
 
         public static Stream<Arguments> testSub() {
             return Stream.of(
-                Arguments.of("Sub", "sub --left 1.0 --right 2.0", Map.of("left", 1.0, "right", 2.0)),
-                Arguments.of("Left Only", "sub --left 1.0", null),
+                Arguments.of("Sub", "sub --left 1.0 --right 2.0", Map.of("right", 2.0, "left", 1.0)),
+                Arguments.of("Left Only", "sub --left 1.0", IllegalArgumentException.class),
                 Arguments.of("Right Only", "sub --right 2.0", Map.of("left", Optional.empty(), "right", 2.0)),
-                Arguments.of("Missing Value", "sub --right", null),
-                Arguments.of("Extraneous Argument", "sub --right 2.0 extraneous", null),
-                Arguments.of("Misspelled Flag", "sub --write 2.0", null),
-                Arguments.of("Not A Number", "sub --right two", null)
+                Arguments.of("Missing Value", "sub --right", IllegalArgumentException.class),
+                Arguments.of("Extraneous Argument", "sub --right 2.0 extraneous", IllegalArgumentException.class),
+                Arguments.of("Misspelled Flag", "sub --write 2.0", IllegalArgumentException.class),
+                Arguments.of("Not A Number", "sub --right two", IllegalArgumentException.class)
             );
         }
 
@@ -119,11 +140,11 @@ public class ScenariosTests {
     private static void test(String command, Object expected) {
         if (expected != null) {
             var result = Scenarios.parse(command);
-            Assertions.assertEquals(expected, result);
+            assertEquals(expected, result);
         } else {
             //TODO: Update with your specific Exception class or whatever other
             //error handling model you use to check for specific library issues.
-            Assertions.assertThrows(Exception.class, () -> {
+            assertThrows(Exception.class, () -> {
                 Scenarios.parse(command);
             });
         }

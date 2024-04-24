@@ -24,7 +24,7 @@ public class Lexer {
         } else if (part.matches("^--\\w+$")) {
             return Token.Type.FLAGS;
         } else if (part.matches("^\\d+\\.\\d+$")) {
-            return Token.Type.FLOAT; // Assume decimal is float
+            return Token.Type.FLOAT;
         } else if (part.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
             return Token.Type.DATE;
         } else if (isCommand(part)) {
