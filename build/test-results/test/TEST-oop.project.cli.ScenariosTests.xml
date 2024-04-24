@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="oop.project.cli.ScenariosTests" tests="5" skipped="0" failures="0" errors="0" timestamp="2024-04-24T01:58:17" hostname="Jasons-MacBook-Pro-2.local" time="0.017">
+  <properties/>
+  <testcase name="[1] add, [COMMAND: add]" classname="oop.project.cli.ScenariosTests" time="0.01"/>
+  <testcase name="[2] --flag 123, [FLAGS: --flag, INTEGER: 123]" classname="oop.project.cli.ScenariosTests" time="0.001"/>
+  <testcase name="[3] --opt 45.67, [FLAGS: --opt, FLOAT: 45.67]" classname="oop.project.cli.ScenariosTests" time="0.001"/>
+  <testcase name="[4] xyz, [INVALID: xyz]" classname="oop.project.cli.ScenariosTests" time="0.0"/>
+  <testcase name="[5] 2022-01-01, [DATE: 2022-01-01]" classname="oop.project.cli.ScenariosTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

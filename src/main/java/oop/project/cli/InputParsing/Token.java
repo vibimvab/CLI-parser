@@ -1,5 +1,9 @@
 package oop.project.cli.InputParsing;
 
+/**
+ * Represents a token that is produced by the Lexer.
+ * This token can be of various types defined in the Type enum,
+ */
 public class Token {
     public enum Type{
         COMMAND, INTEGER, INVALID, FLAGS, DATE, FLOAT

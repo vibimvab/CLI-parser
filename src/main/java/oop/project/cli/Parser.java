@@ -10,11 +10,18 @@ public class Parser {
     public Lexer lexer;
     private Map<String, Command> commands;
 
+    /**
+     * Initializes the lexer and command map for the parser.
+     */
     public Parser() {
         this.lexer = new Lexer();
         commands = new HashMap<>();
         setupCommands();
     }
+
+    /**
+     * Configures commands with their respective arguments.
+     */
     private void setupCommands() {
         // TODO NamedArguments is always empty because we never actually put anything into it. Need to
         // work around that
@@ -31,7 +38,15 @@ public class Parser {
         commands.put("sub", new Command("sub", subArgs, new ArrayList<>()));
     }
 
+    /**
+     * Parses a list of tokens into a structured command with arguments.
+     *
+     * @param tokens the list of tokens to parse
+     * @return a map of argument names to their parsed values
+     * @throws IllegalArgumentException if no tokens are provided or the command is unknown
+     */
     public Map<String, Object> parse(List<Token> tokens) {
+        //TODO NAMED ARGUMENTS NOT WORKING WITH THIS IMPLEMENTATION
         if (tokens.isEmpty()) {
             throw new IllegalArgumentException("No input provided.");
         }
@@ -40,48 +55,72 @@ public class Parser {
         if (command == null) {
             throw new IllegalArgumentException("Unknown Command: " + commandToken.getValue());
         }
+        int i = 1;
 
         return handleCommand(command, tokens.subList(1, tokens.size()));
     }
 
+    /**
+     * Handles the parsing of tokens into arguments based on the specified command.
+     *
+     * @param command the command configuration
+     * @param tokens  the list of tokens representing arguments
+     * @return a map of argument names to their parsed values
+     */
     private Map<String, Object> handleCommand(Command command, List<Token> tokens) {
         Map<String, Object> parsedArguments = new HashMap<>();
         System.out.println("hello");
         System.out.println(command.getName());
         System.out.println(command.getNamedArguments());
+        System.out.println(tokens.size());
+
+        //TODO NAMED ARGUMENTS FOR SINGLE ONES. WORKS FOR TWO NAMED ARGUMENTS
         // Initialize with default values or mark as Optional.empty() if not provided
-        for (Argument arg : command.getNamedArguments()) {
-            System.out.println(arg.getName());
-            if (arg.isOptional()) {
-                System.out.println("this runs");
-                parsedArguments.put(arg.getName(), arg.getDefaultValue().orElse(Optional.empty()));
-            }
-        }
-        int positionalIndex = 0;
-        for (Token token : tokens) {
+//        for (Argument arg : command.getNamedArguments()) {
+//            System.out.println(arg.getName());
+//            if (arg.isOptional()) {
+//                System.out.println("this runs");
+//                parsedArguments.put(arg.getName(), arg.getDefaultValue().orElse(Optional.empty()));
+//            }
+//        }
+        int positionalIndex = 0; // Track the position of positional arguments.
+
+        // Loop through all tokens, processing each based on its type and expected format.
+        int i = 0;
+        while (i < tokens.size()) {
+            Token token = tokens.get(i);
             if (token.getType() == Token.Type.FLAGS) {
                 String key = token.getValue().substring(2);
-                if (tokens.indexOf(token) + 1 < tokens.size()) {
-                    Token nextToken = tokens.get(tokens.indexOf(token) + 1);
+                // Ensure there is a next token and it is not another flag
+                if (i + 1 < tokens.size() && tokens.get(i + 1).getType() != Token.Type.FLAGS) {
+                    Token nextToken = tokens.get(i + 1);
                     Argument arg = findArgumentByName(command, key);
+
+                    // Validate the type of the next token and ensure it matches the expected type of the argument.
                     if (arg != null && validateType(arg, nextToken)) {
                         parsedArguments.put(key, parseValue(nextToken, arg.getType()));
+                        i++; // Skip the next token since it's the value for the current flag
                     } else {
                         throw new IllegalArgumentException("Invalid type for flag: " + key);
                     }
+                } else {
+                    // If no valid next token, throw exception or handle as error
+                    throw new IllegalArgumentException("Expected value after flag: " + key);
                 }
             } else {
+                // Process positional arguments if the token is not a flag.
                 if (positionalIndex < command.getPositionalArguments().size()) {
                     Argument arg = command.getPositionalArguments().get(positionalIndex++);
                     if (validateType(arg, token)) {
                         parsedArguments.put(arg.getName(), parseValue(token, arg.getType()));
                     } else {
-                        throw new IllegalArgumentException("Invalid type for argument: " + arg.getName());
+                        throw new IllegalArgumentException("Invalid type for positional argument: " + arg.getName());
                     }
                 } else {
                     throw new IllegalArgumentException("Extraneous argument provided: " + token.getValue());
                 }
             }
+            i++;
         }
 
         verifyArguments(command, parsedArguments);
@@ -103,7 +142,6 @@ public class Parser {
     }
 
     private Argument findArgumentByName(Command command, String name) {
-        // Check both positional and named arguments for the command
         for (Argument arg : command.getPositionalArguments()) {
             if (arg.getName().equals(name)) {
                 return arg;
@@ -114,7 +152,7 @@ public class Parser {
                 return arg;
             }
         }
-        return null; // No argument found with the given name
+        return null;
     }
 
     private Object parseValue(Token token, String type) {
@@ -123,7 +161,7 @@ public class Parser {
         } else if (type.equals("float")) {
             return Float.parseFloat(token.getValue());
         }
-        return token.getValue(); // For strings or unhandled types
+        return token.getValue();
     }
 
     private void verifyArguments(Command command, Map<String, Object> providedArgs) {

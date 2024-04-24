@@ -1,5 +1,7 @@
 package oop.project.cli;
 
+import oop.project.cli.InputParsing.Lexer;
+import oop.project.cli.InputParsing.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -135,6 +138,28 @@ public class ScenariosTests {
             );
         }
 
+    }
+    @ParameterizedTest
+    @MethodSource("Lexing")
+    public void testLexing(String input, List<Token> expectedTokens) {
+        Lexer lexer = new Lexer();
+        List<Token> resultTokens = lexer.lex(input);
+        assertEquals(expectedTokens.size(), resultTokens.size(), "Number of tokens should match.");
+
+        for (int i = 0; i < expectedTokens.size(); i++) {
+            assertEquals(expectedTokens.get(i).getType(), resultTokens.get(i).getType(), "Token types should match.");
+            assertEquals(expectedTokens.get(i).getValue(), resultTokens.get(i).getValue(), "Token values should match.");
+        }
+    }
+
+    public static Stream<Arguments> Lexing() {
+        return Stream.of(
+                Arguments.of("add", List.of(new Token(Token.Type.COMMAND, "add"))),
+                Arguments.of("--flag 123", List.of(new Token(Token.Type.FLAGS, "--flag"), new Token(Token.Type.INTEGER, "123"))),
+                Arguments.of("--opt 45.67", List.of(new Token(Token.Type.FLAGS, "--opt"), new Token(Token.Type.FLOAT, "45.67"))),
+                Arguments.of("xyz", List.of(new Token(Token.Type.INVALID, "xyz"))),
+                Arguments.of("2022-01-01", List.of(new Token(Token.Type.DATE, "2022-01-01")))
+        );
     }
 
     private static void test(String command, Object expected) {
